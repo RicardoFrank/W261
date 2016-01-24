@@ -34,10 +34,11 @@ for line in lines:
     if len(line.split('\t')) == 4:
         tmp = line.split('\t')
         all_text = tmp[2] + " " + tmp[3]
+        true_label = tmp[1]
         
         #append the tuple (ID, target word count)
         target_word_count = len(re.findall(findword,all_text))
-        output_set.append(str(tmp[0] + "," + str(target_word_count)))
+        output_set.append(str(tmp[0] + "," + str(target_word_count)) + "," + true_label)
             
         #if spam
         if tmp[1] == "1":

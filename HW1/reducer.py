@@ -43,6 +43,7 @@ total_words_int_not_spam = len(total_set_of_not_spam.split(' '))
 p_spam = float(spam_count) / float(email_count)
 p_not_spam = 1 - p_spam
 
+error_count = 0
 
 #compute probability of spam vs not spam
 for filename in sys.argv[1:]:
@@ -54,6 +55,7 @@ for filename in sys.argv[1:]:
     for line in lines:
         ID = line.split(',')[0]
         target_count = line.split(',')[1]
+        true_label = line.split(',')[2]
         #p_word = float(target_count) / float(total_words_unique) 
         p_cond_spam = float(target_in_spam) / float(total_words_in_spam)
         p_cond_not_spam = float(target_in_not_spam) / float(total_words_int_not_spam)
@@ -71,7 +73,15 @@ for filename in sys.argv[1:]:
         log_prob_not_spam = math.log(p_not_spam) + math.log(p_cond_not_spam) * float(target_count)
         
         if log_prob_spam > log_prob_not_spam:
-            print ID + ",1," + str(log_prob_spam) + "," + str(log_prob_not_spam)
+            print ID + ",1," + true_label + "," + str(log_prob_spam) + "," + str(log_prob_not_spam)
+            
+            if true_label is not "1":
+                error_count += 1
         else:
-            print ID + ",0," + str(log_prob_spam) + "," + str(log_prob_not_spam)
+            print ID + ",0," + true_label + "," + str(log_prob_spam) + "," + str(log_prob_not_spam)
+            
+            if true_label is not "0":
+                error_count += 1
+
+print float(error_count) / float(100)
         
