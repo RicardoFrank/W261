@@ -66,5 +66,10 @@ echo $countfiles
 ####
 ####
 
+
+
+! cat enronemail_1h.txt.output
+
+
 ## clean up the data chunks and temporary count files
 \rm $data.chunk.*

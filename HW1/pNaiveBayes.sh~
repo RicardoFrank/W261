@@ -58,12 +58,15 @@ echo "Done mapping"
 countfiles=`\ls $data.chunk.*.counts | perl -pe 's/\n/ /'`
 
 echo $countfiles
+
 ## feed the list of countfiles to the python reducer and redirect STDOUT to disk
 ####
 ####
 ./reducer.py $countfiles > $data.output
 ####
 ####
+
+echo $data.output
 
 ## clean up the data chunks and temporary count files
 \rm $data.chunk.*

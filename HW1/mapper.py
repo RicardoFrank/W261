@@ -11,7 +11,7 @@ import re
 ## collect user input
 
 filename = sys.argv[1]
-findwords = re.split(" ",sys.argv[2].lower())
+findword = sys.argv[2]  #ok for this example since we only have 1 arg
  
 lines = open(filename).read().splitlines()
 
@@ -32,47 +32,37 @@ words_in_not_spam_count = 0
 #get [spam email, email] count
 for line in lines:
     if len(line.split('\t')) == 4:
-        
-        target_word_count = 0
         tmp = line.split('\t')
         all_text = tmp[2] + " " + tmp[3]
         
-        #for each word, count number of times seen in line, and increment other counts
-        for target in findwords:
-            
-            #add times a target is seen
-            target_word_count += len(re.findall(target,all_text))
-
-            #if spam
-            if tmp[1] == "1":
-                #check to see if we've seen the word before in spam
-                for word in all_text.split(' '):
-                    if word not in set_of_words_spam:
-                        set_of_words_spam = set_of_words_spam + word + " "
-
-                #increment number of times seen in spam and total spam words
-                target_in_spam_count += len(re.findall(target,all_text))
-                words_in_spam_count += len(all_text.split(' '))
-                
-
-            #not spam
-            else:
-                #check to see if the word is in the total corpus
-                for word in all_text.split(' '):
-                    if word not in set_of_words_not_spam:
-                        set_of_words_not_spam = set_of_words_not_spam + word + " "
-
-                #increment number of times seen in not_spam
-                target_in_not_spam_count += len(re.findall(target,all_text))
-                words_in_not_spam_count += len(all_text.split(' '))
-
-        if tmp[1] == "1":
-            spam_count += 1
-
-        email_count += 1
-        
-        #append (ID, target count)
+        #append the tuple (ID, target word count)
+        target_word_count = len(re.findall(findword,all_text))
         output_set.append(str(tmp[0] + "," + str(target_word_count)))
+            
+        #if spam
+        if tmp[1] == "1":
+            #check to see if we've seen the word before in spam
+            for word in all_text.split(' '):
+                if word not in set_of_words_spam:
+                    set_of_words_spam = set_of_words_spam + word + " "
+            
+            #increment number of times seen in spam and total spam words
+            target_in_spam_count += len(re.findall(findword,all_text))
+            words_in_spam_count += len(all_text.split(' '))
+            spam_count += 1
+        
+        #not spam
+        else:
+            #check to see if the word is in the total corpus
+            for word in all_text.split(' '):
+                if word not in set_of_words_not_spam:
+                    set_of_words_not_spam = set_of_words_not_spam + word + " "
+            
+            #increment number of times seen in not_spam
+            target_in_not_spam_count += len(re.findall(findword,all_text))
+            words_in_not_spam_count += len(all_text.split(' '))
+            
+        email_count += 1
 
 #append email stats
 output_set.append(str(spam_count)+","+str(email_count))
