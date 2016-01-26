@@ -11,21 +11,15 @@ input = []
 
 for line in sys.stdin:
     input.append(line)
-        #matches = re.findall('\bassistance\b',line)
-        #if len(matches) > 0:
-        #       print matches
 
 output = {}
-output["1"] = 0
-output["0"] = 0
-output["1 words"] = ""
-output["0 words"] = ""
-output["1 assistance"] = 0
-output["0 assistance"] = 0
-output["1 word count"] = 0
-output["0 word count"] = 0
-output["1 list"] = ""
-output["0 list"] = ""
+output["1"] = 0                 #count of spam
+output["0"] = 0                 #count of nonspam
+output["1 assistance"] = 0      #count of assistance for spam
+output["0 assistance"] = 0      #count of assistance for nonspam
+output["1 list"] = ""           #list of IDs spam 
+output["0 list"] = ""           #list of IDs nonspam
+output["ID assistance count"] = ""  #list of IDs, assistance in email
 
 skip_email = False
 
@@ -42,7 +36,7 @@ for line in input:
         all_text = tmp[2] + " " + tmp[3]
         true_label = tmp[1]
 
-        #empty subject
+    #empty subject
     elif len(line.split('\t')) == 3:
         tmp = line.split('\t')
         all_text = tmp[-1]
@@ -57,9 +51,12 @@ for line in input:
         #count number of times assistance is present
         #output["assistance"] += len(re.findall("assistance",clean_line))
 
-        #append the email text
+        #append ID,assistance_count
         id = tmp[0]
-        output[id] = all_text
+        if output["ID assistance count"] == "":
+                output["ID assistance count"] = id+","+str(len(re.findall(r'\bassistance\b',all_text)))+" "
+        else:
+            output["ID assistance count"] += id+","+str(len(re.findall(r'\bassistance\b',all_text)))+" "
         
         #add words seen and increment keys
         tokens = re.split("[, \.\n]+", all_text)
@@ -69,22 +66,15 @@ for line in input:
             else:
                 output[word] = 1
         
-
         #if spam
         if tmp[1] == "1":
             #add id to spam list
             output["1 list"] += id + " "
 
-            #check to see if we've seen the word before in spam
-            for word in re.split("[, \.\n]+", all_text):
-                if word not in output["1 words"].split(' '):
-                    output["1 words"] = output["1 words"] + word + " "
-
             #increment spam count, assistance in spam count, and words in spam
             matches = re.findall(r'\bassistance\b',all_text)
 
             output["1 assistance"] += len(matches)
-            output["1 word count"] += len(clean_line)
             output["1"] += 1
 
                 #if len(matches) > 0:
@@ -94,20 +84,12 @@ for line in input:
             #add id to not spam list
             output["0 list"] += id + " "
 
-            #check to see if we've seen the word before in not spam
-            for word in re.split("[, \.\n]+", all_text):
-                    if word not in output["0 words"].split(' '):
-                            output["0 words"] = output["0 words"] + word + " "
-
             #increment not spam count, assistance in not spam count, and words
             #not in spam
             matches = re.findall(r'\bassistance\b',all_text)
             output["0 assistance"] += len(matches)
-            output["0 word count"] += len(clean_line)
             output["0"] += 1
 
-                        #if len(matches) >0:
-                        #       print line
 #print all info
 for key, value in output.items():
     print key + "\t" + str(value)
