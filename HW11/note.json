@@ -1,0 +1,415 @@
+{
+  "paragraphs": [
+    {
+      "text": "%md\n\nKuan Lin, Ricardo Barrera, Alejandro J. Rojas\nale@ischool.berkeley.edu\nW261: Machine Learning at Scale\nWeek: 11\nApr 5, 2016, 1:15 PM",
+      "dateUpdated": "Apr 6, 2016 12:26:50 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459921876862_-209181607",
+      "id": "20160405-225116_1334494183",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003cp\u003eKuan Lin, Ricardo Barrera, Alejandro J. Rojas\n\u003cbr  /\u003eale@ischool.berkeley.edu\n\u003cbr  /\u003eW261: Machine Learning at Scale\n\u003cbr  /\u003eWeek: 11\n\u003cbr  /\u003eApr 5, 2016, 1:15 PM\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 5, 2016 10:51:16 PM",
+      "dateStarted": "Apr 5, 2016 10:52:45 PM",
+      "dateFinished": "Apr 5, 2016 10:52:46 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n##HW11.0 Broadcast versus Caching in Spark¶\n#####What is the difference between broadcasting and caching data in Spark? Give an example (in the context of machine learning) of each mechanism (at a highlevel). Feel free to cut and paste code examples from the lectures to support your answer.\n#####Review the following Spark-notebook-based implementation of KMeans and use the broadcast pattern to make this implementation more efficient. Please describe your changes in English first, implement, comment your code and highlight your changes:\n#####Notebook https://www.dropbox.com/s/41q9lgyqhy8ed5g/EM-Kmeans.ipynb?dl\u003d0\n#####Notebook via NBViewer http://nbviewer.ipython.org/urls/dl.dropbox.com/s/41q9lgyqhy8ed5g/EM-Kmeans.ipynb\nCaching data in Sapark is useful to keep in memory data that you need to process multiple times. An example of it would be cacg\u003dhing a training dataset. On the other hand boradcasting is implemented whem you need to let worker nodes the status of a specific variable. For example when running logistic regression you need to broadcast the value of the weights after each iteration so that worker nodes can process gradient descent using the most current weights.\nTo make the K-Means code more efficient we will boradcast the values of the centroids of each cluster so that the worker nodes get that info on their own memory",
+      "dateUpdated": "Apr 6, 2016 12:26:50 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459921965897_-1617854076",
+      "id": "20160405-225245_1581795545",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch2\u003eHW11.0 Broadcast versus Caching in Spark¶\u003c/h2\u003e\n\u003ch5\u003eWhat is the difference between broadcasting and caching data in Spark? Give an example (in the context of machine learning) of each mechanism (at a highlevel). Feel free to cut and paste code examples from the lectures to support your answer.\u003c/h5\u003e\n\u003ch5\u003eReview the following Spark-notebook-based implementation of KMeans and use the broadcast pattern to make this implementation more efficient. Please describe your changes in English first, implement, comment your code and highlight your changes:\u003c/h5\u003e\n\u003ch5\u003eNotebook https://www.dropbox.com/s/41q9lgyqhy8ed5g/EM-Kmeans.ipynb?dl\u003d0\u003c/h5\u003e\n\u003ch5\u003eNotebook via NBViewer http://nbviewer.ipython.org/urls/dl.dropbox.com/s/41q9lgyqhy8ed5g/EM-Kmeans.ipynb\u003c/h5\u003e\n\u003cp\u003eCaching data in Sapark is useful to keep in memory data that you need to process multiple times. An example of it would be cacg\u003dhing a training dataset. On the other hand boradcasting is implemented whem you need to let worker nodes the status of a specific variable. For example when running logistic regression you need to broadcast the value of the weights after each iteration so that worker nodes can process gradient descent using the most current weights.\n\u003cbr  /\u003eTo make the K-Means code more efficient we will boradcast the values of the centroids of each cluster so that the worker nodes get that info on their own memory\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 5, 2016 10:52:45 PM",
+      "dateStarted": "Apr 5, 2016 10:57:09 PM",
+      "dateFinished": "Apr 5, 2016 10:57:09 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%pyspark\nimport numpy as np\nimport pylab \nimport json\nsize1 \u003d size2 \u003d size3 \u003d 1000\nsamples1 \u003d np.random.multivariate_normal([4, 0], [[1, 0],[0, 1]], size1)\ndata \u003d samples1\nsamples2 \u003d np.random.multivariate_normal([6, 6], [[1, 0],[0, 1]], size2)\ndata \u003d np.append(data,samples2, axis\u003d0)\nsamples3 \u003d np.random.multivariate_normal([0, 4], [[1, 0],[0, 1]], size3)\ndata \u003d np.append(data,samples3, axis\u003d0)\n# Randomlize data\ndata \u003d data[np.random.permutation(size1+size2+size3),]\nnp.savetxt(\u0027data.csv\u0027,data,delimiter \u003d \u0027,\u0027)\n\npylab.plot(samples1[:, 0], samples1[:, 1],\u0027*\u0027, color \u003d \u0027red\u0027)\npylab.plot(samples2[:, 0], samples2[:, 1],\u0027o\u0027,color \u003d \u0027blue\u0027)\npylab.plot(samples3[:, 0], samples3[:, 1],\u0027+\u0027,color \u003d \u0027green\u0027)\npylab.show()",
+      "dateUpdated": "Apr 6, 2016 12:28:34 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459927668231_-518879354",
+      "id": "20160406-002748_1013912816",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Apr 6, 2016 12:27:48 AM",
+      "dateStarted": "Apr 6, 2016 12:28:34 AM",
+      "dateFinished": "Apr 6, 2016 12:28:39 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n\n##Modified Kmeans visualization\n\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans.png?raw\u003dtrue)",
+      "dateUpdated": "Apr 6, 2016 12:52:04 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459927745519_138210471",
+      "id": "20160406-002905_1645374034",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch2\u003eModified Kmeans visualization\u003c/h2\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 6, 2016 12:29:05 AM",
+      "dateStarted": "Apr 6, 2016 12:52:04 AM",
+      "dateFinished": "Apr 6, 2016 12:52:04 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%pyspark\nimport numpy as np\n\n#Calculate which class each data point belongs to\ndef nearest_centroid(line):\n    x \u003d np.array([float(f) for f in line.split(\u0027,\u0027)])\n    closest_centroid_idx \u003d np.sum((x - centroids)**2, axis\u003d1).argmin()\n    return (closest_centroid_idx,(x,1))\n\n#plot centroids and data points for each iteration\ndef plot_iteration(means):\n    pylab.plot(samples1[:, 0], samples1[:, 1], \u0027.\u0027, color \u003d \u0027blue\u0027)\n    pylab.plot(samples2[:, 0], samples2[:, 1], \u0027.\u0027, color \u003d \u0027blue\u0027)\n    pylab.plot(samples3[:, 0], samples3[:, 1],\u0027.\u0027, color \u003d \u0027blue\u0027)\n    pylab.plot(means[0][0], means[0][1],\u0027*\u0027,markersize \u003d10,color \u003d \u0027red\u0027)\n    pylab.plot(means[1][0], means[1][1],\u0027*\u0027,markersize \u003d10,color \u003d \u0027red\u0027)\n    pylab.plot(means[2][0], means[2][1],\u0027*\u0027,markersize \u003d10,color \u003d \u0027red\u0027)\n    pylab.show()\n\nK \u003d 3\n# Initialization: initialization of parameter is fixed to show an example\ncentroids \u003d np.array([[0.0,0.0],[2.0,2.0],[0.0,7.0]])\n\nD \u003d sc.textFile(\"./data.csv\").cache()\niter_num \u003d 0\nfor i in range(10):  \n    res \u003d D.map(nearest_centroid).reduceByKey(lambda x,y : (x[0]+y[0],x[1]+y[1])).collect()\n    \n    ####### We add the broadcasting of the centroids #########\n    cBroadcast \u003d sc.broadcast(centroids)\n    #res [(0, (array([  2.66546663e+00,   3.94844436e+03]), 1001)  ), \n    #     (2, (array([ 6023.84995923,  5975.48511018]), 1000)), \n    #     (1, (array([ 3986.85984761,    15.93153464]), 999))]\n    # res[1][1][1] returns 1000 here\n    res \u003d sorted(res,key \u003d lambda x : x[0])  #sort based on clusted ID\n    centroids_new \u003d np.array([x[1][0]/x[1][1] for x in res])  #divide by cluster size\n    if np.sum(np.absolute(centroids_new-centroids))\u003c0.01:\n        break\n    print \"Iteration\" + str(iter_num)\n    iter_num \u003d iter_num + 1 \n    centroids \u003d centroids_new\n    print centroids\n    plot_iteration(centroids)\nprint \"Final Results:\"\nprint centroids",
+      "dateUpdated": "Apr 6, 2016 12:44:44 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459928231017_992614063",
+      "id": "20160406-003711_266664338",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "Iteration0\n[[ 0.8957112   0.47837321]\n [ 3.97754884  2.60895741]\n [ 2.20431433  5.78281748]]\nIteration1\n[[ 1.56961228  0.94002298]\n [ 5.24005071  2.30920505]\n [ 2.63175128  5.50647501]]\nIteration2\n[[ 1.79817     1.06646767]\n [ 5.59297197  2.4547133 ]\n [ 2.87088491  5.57667958]]\nIteration3\n[[ 1.91951787  1.12935628]\n [ 5.80812376  2.80175385]\n [ 3.01248901  5.6617454 ]]\nIteration4\n[[ 2.10820032  1.11943896]\n [ 6.08525286  3.56259028]\n [ 2.9471883   5.71178226]]\nTraceback (most recent call last):\n  File \"/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/matplotlib/backends/backend_macosx.py\", line 472, in save_figure\n    self.canvas.print_figure(filename)\n  File \"/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/matplotlib/backend_bases.py\", line 2129, in print_figure\n    print_method \u003d self._get_print_method(format)\n  File \"/System/Library/Frameworks/Python.framework/Versions/2.7/Extras/lib/python/matplotlib/backend_bases.py\", line 2070, in _get_print_method\n    \u0027%s.\u0027 % (format, \u0027, \u0027.join(formats)))\nValueError: Format \"pn\" is not supported.\nSupported formats: bmp, eps, gif, jpeg, jpg, pdf, pgf, png, ps, raw, rgba, svg, svgz, tif, tiff.\nIteration5\n[[ 2.52404258  0.93046311]\n [ 6.35303497  5.10575198]\n [ 1.97362679  5.45031338]]\nIteration6\n[[ 3.50229492  0.26825042]\n [ 6.11647697  6.02694593]\n [ 0.10280434  4.35504326]]\nIteration7\n[[ 3.9627851  -0.01010655]\n [ 6.04208241  6.04943778]\n [-0.01290711  4.04585706]]\nIteration8\n[[  3.98766628e+00  -3.14556868e-02]\n [  6.03852548e+00   6.05060891e+00]\n [  3.31274665e-03   4.01953346e+00]]\nFinal Results:\n[[  3.98766628e+00  -3.14556868e-02]\n [  6.03852548e+00   6.05060891e+00]\n [  3.31274665e-03   4.01953346e+00]]\n"
+      },
+      "dateCreated": "Apr 6, 2016 12:37:11 AM",
+      "dateStarted": "Apr 6, 2016 12:44:44 AM",
+      "dateFinished": "Apr 6, 2016 12:46:51 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n\n#####iter 0\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans1.png?raw\u003dtrue)\n\n#####iter 1\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans2.png?raw\u003dtrue)\n\n#####iter 2\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans3.png?raw\u003dtrue)\n\n#####iter 3\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans4.png?raw\u003dtrue)\n\n#####iter 4\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans5.png?raw\u003dtrue)\n\n#####iter 5\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans6.png?raw\u003dtrue)\n\n#####iter 6\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans7.png?raw\u003dtrue)\n\n#####iter 7\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans8.png?raw\u003dtrue)\n\n#####iter 8\n![alttext](https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans9.png?raw\u003dtrue)\n\n",
+      "dateUpdated": "Apr 6, 2016 12:54:30 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459929156308_-1748386362",
+      "id": "20160406-005236_1503393836",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch5\u003eiter 0\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans1.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 1\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans2.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 2\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans3.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 3\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans4.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 4\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans5.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 5\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans6.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 6\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans7.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 7\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans8.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003ch5\u003eiter 8\u003c/h5\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://github.com/RicardoFrank/W261/blob/master/HW11/Kmeans9.png?raw\u003dtrue\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 6, 2016 12:52:36 AM",
+      "dateStarted": "Apr 6, 2016 12:54:30 AM",
+      "dateFinished": "Apr 6, 2016 12:54:30 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%pyspark\n\nfrom pyspark.mllib.clustering import KMeans, KMeansModel\nfrom numpy import array\nfrom math import sqrt\n\n# Load and parse the data\ndata \u003d sc.textFile(\"data.csv\")\nparsedData \u003d data.map(lambda line: array([float(x) for x in line.split(\u0027,\u0027)]))\n\n# Build the model (cluster the data)\nclusters \u003d KMeans.train(parsedData, 3, maxIterations\u003d20,\n        runs\u003d10, initializationMode\u003d\"random\")\nfor centroid in clusters.centers:\n    print centroid",
+      "dateUpdated": "Apr 6, 2016 12:56:13 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459929324644_-1702206627",
+      "id": "20160406-005524_249311846",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": "/opt/zeppelin-0.5.6-incubating-bin-all/interpreter/spark/pyspark/pyspark.zip/pyspark/mllib/clustering.py:176: UserWarning: Support for runs is deprecated in 1.6.0. This param will have no effect in 1.7.0.\n[  3.31274665e-03   4.01953346e+00]\n[ 6.03852548  6.05060891]\n[ 3.98766628 -0.03145569]\n"
+      },
+      "dateCreated": "Apr 6, 2016 12:55:24 AM",
+      "dateStarted": "Apr 6, 2016 12:56:13 AM",
+      "dateFinished": "Apr 6, 2016 12:56:14 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n##HW11.1\n\n#####In the context of binary classification problems, does the linear SVM learning algorithm yield the same result as a L2 penalized logistic regesssion learning algorithm? \n\n#####In your reponse, please discuss the loss functions, and the learnt models, and separating surfaces between the two classes.\n\n\n#####In the context of binary classification problems, does the linear SVM learning algorithm yield the same result as a perceptron learning algorithm? \n\n#####[OPTIONAL]: generate an artifical binary classification dataset with 2 input features and plot the learnt separating surface for both a linear SVM and for  logistic regression. Comment on the learnt surfaces. Please feel free to do this in Python (no need to use Spark).\n\nLinear SVM learning does not yield the same result as L2 logistic regression as the algorithms are fundamentally different.  SVM uses separation by margin to determine the class like LR, but SVM boundary is established by maximizing perpendicular distance to the boundary.  LR, on the other hand, is minimizing training error.  So, the boundary lines for each classifier will likely be different except in simple examples because their underlying mechanics are different.\nA perceptron based LR, however, is the same as SVM in a binary classification situation because perceptrons will try to establish a boundary that minimizes the margin, which is the dual of maximizing the support.\n",
+      "dateUpdated": "Apr 6, 2016 12:26:50 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459922039887_-1325906282",
+      "id": "20160405-225359_1923468523",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch2\u003eHW11.1\u003c/h2\u003e\n\u003ch5\u003eIn the context of binary classification problems, does the linear SVM learning algorithm yield the same result as a L2 penalized logistic regesssion learning algorithm?\u003c/h5\u003e\n\u003ch5\u003eIn your reponse, please discuss the loss functions, and the learnt models, and separating surfaces between the two classes.\u003c/h5\u003e\n\u003ch5\u003eIn the context of binary classification problems, does the linear SVM learning algorithm yield the same result as a perceptron learning algorithm?\u003c/h5\u003e\n\u003ch5\u003e[OPTIONAL]: generate an artifical binary classification dataset with 2 input features and plot the learnt separating surface for both a linear SVM and for  logistic regression. Comment on the learnt surfaces. Please feel free to do this in Python (no need to use Spark).\u003c/h5\u003e\n\u003cp\u003eLinear SVM learning does not yield the same result as L2 logistic regression as the algorithms are fundamentally different.  SVM uses separation by margin to determine the class like LR, but SVM boundary is established by maximizing perpendicular distance to the boundary.  LR, on the other hand, is minimizing training error.  So, the boundary lines for each classifier will likely be different except in simple examples because their underlying mechanics are different.\n\u003cbr  /\u003eA perceptron based LR, however, is the same as SVM in a binary classification situation because perceptrons will try to establish a boundary that minimizes the margin, which is the dual of maximizing the support.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 5, 2016 10:53:59 PM",
+      "dateStarted": "Apr 5, 2016 11:54:20 PM",
+      "dateFinished": "Apr 5, 2016 11:54:20 PM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n##HW11.2 Gradient descent\n#####In the context of logistic regression describe and define three flavors of penalized loss functions.\n#####Are these all supported in Spark MLLib (include online references to support your answers)?\n#####Descibe probabilitic interpretations of the L1 and L2 priors for penalized logistic regression (HINT: see synchronous slides for week 11 for details)\nIn the context of logistic regression, the three flavors of penalized terms are:\nL1 Reg, which penalizes for sum of absolute weights: ![alt text](https://camo.githubusercontent.com/602d3c7d5c0253998a379204fef0dfb1b50b2089/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f6c315f7265672e504e47)\n\nL2 Reg, penalizes sum of squared weights: ![alttext](https://camo.githubusercontent.com/665472e8f153468eb8d8ae8d76b2f18d138cba84/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f6c325f7265672e504e47)\n\nElastic Net, penalizes a linear combination of L1 and L2 norms: ![alttext] (https://camo.githubusercontent.com/55b3abb5b2184bffec168e116523e17f2ce595bb/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f656c61737469635f6e65742e504e47)\n\nAll of the above three regularization methods are supported by spark.mllib:\n[http://spark.apache.org/docs/latest/mllib-linear-methods.html#regularizers](http://spark.apache.org/docs/latest/mllib-linear-methods.html#regularizers)\n#####Probablisitic interpretation of L1 and L2 priors:\nL1 regularization can be interpreted as using Laplace distribution as the prior distribution for the model weights, where as L2 regularization can be interpreted as using gaussian distribution as the prior distribution for the model weights. \n\n![alttext](https://camo.githubusercontent.com/81c32df7db073e7aeaffd78139f1d7d3f3fc9737/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f676175737369616e5f76735f6c61706c6163652e504e47)\n\nThe Laplace distribution has more density closer to mean (usually zero in most settings) in comparison to the gaussian distribution, and therefore L1 regularization will tend to push the model weights toward zero.",
+      "dateUpdated": "Apr 6, 2016 12:26:50 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459925660189_-2120068527",
+      "id": "20160405-235420_1045093618",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch2\u003eHW11.2 Gradient descent\u003c/h2\u003e\n\u003ch5\u003eIn the context of logistic regression describe and define three flavors of penalized loss functions.\u003c/h5\u003e\n\u003ch5\u003eAre these all supported in Spark MLLib (include online references to support your answers)?\u003c/h5\u003e\n\u003ch5\u003eDescibe probabilitic interpretations of the L1 and L2 priors for penalized logistic regression (HINT: see synchronous slides for week 11 for details)\u003c/h5\u003e\n\u003cp\u003eIn the context of logistic regression, the three flavors of penalized terms are:\n\u003cbr  /\u003eL1 Reg, which penalizes for sum of absolute weights: \u003cimg src\u003d\"https://camo.githubusercontent.com/602d3c7d5c0253998a379204fef0dfb1b50b2089/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f6c315f7265672e504e47\" alt\u003d\"alt text\" /\u003e\u003c/p\u003e\n\u003cp\u003eL2 Reg, penalizes sum of squared weights: \u003cimg src\u003d\"https://camo.githubusercontent.com/665472e8f153468eb8d8ae8d76b2f18d138cba84/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f6c325f7265672e504e47\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003cp\u003eElastic Net, penalizes a linear combination of L1 and L2 norms: \u003cimg src\u003d\"https://camo.githubusercontent.com/55b3abb5b2184bffec168e116523e17f2ce595bb/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f656c61737469635f6e65742e504e47\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003cp\u003eAll of the above three regularization methods are supported by spark.mllib:\n\u003cbr  /\u003e\u003ca href\u003d\"http://spark.apache.org/docs/latest/mllib-linear-methods.html#regularizers\"\u003ehttp://spark.apache.org/docs/latest/mllib-linear-methods.html#regularizers\u003c/a\u003e\u003c/p\u003e\n\u003ch5\u003eProbablisitic interpretation of L1 and L2 priors:\u003c/h5\u003e\n\u003cp\u003eL1 regularization can be interpreted as using Laplace distribution as the prior distribution for the model weights, where as L2 regularization can be interpreted as using gaussian distribution as the prior distribution for the model weights.\u003c/p\u003e\n\u003cp\u003e\u003cimg src\u003d\"https://camo.githubusercontent.com/81c32df7db073e7aeaffd78139f1d7d3f3fc9737/687474703a2f2f70656f706c652e697363686f6f6c2e6265726b656c65792e6564752f7e6b75616e6c696e2f676175737369616e5f76735f6c61706c6163652e504e47\" alt\u003d\"alttext\" /\u003e\u003c/p\u003e\n\u003cp\u003eThe Laplace distribution has more density closer to mean (usually zero in most settings) in comparison to the gaussian distribution, and therefore L1 regularization will tend to push the model weights toward zero.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 5, 2016 11:54:20 PM",
+      "dateStarted": "Apr 6, 2016 12:04:25 AM",
+      "dateFinished": "Apr 6, 2016 12:04:25 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%md\n\n##HW11.3 Logistic Regression\nGenerate 2 sets of linearly separable data with 100 data points each using the data generation code provided below and plot each in separate plots. Call one the training set and the other the testing set.\ndef generateData(n):\n\"\"\" generates a 2D linearly separable dataset with n samples. The third element of the sample is the label \"\"\"\nxb \u003d (rand(n)*2-1)/2-0.5\nyb \u003d (rand(n)*2-1)/2+0.5\nxr \u003d (rand(n)*2-1)/2+0.5\nyr \u003d (rand(n)*2-1)/2-0.5\ninputs \u003d []\nfor i in range(len(xb)):\ninputs.append([xb[i],yb[i],1])\ninputs.append([xr[i],yr[i],-1])\nreturn inputs\nModify this data generation code to generating non-linearly separable training and testing datasets (with approximately 10% of the data falling on the wrong side of the separating hyperplane. Plot the resulting datasets.\nNOTE: For the remainder of this problem please use the non-linearly separable training and testing datasets.\nUsing MLLib train up a LASSO logistic regression model with the training dataset and evaluate with the testing set. What a good number of iterations for training the logistic regression model? Justify with plots and words.\nDerive and implement in Spark a weighted LASSO logistic regression. Implement a convergence test of your choice to check for termination within your training algorithm .\nWeight the above training dataset as follows: Weight each example using the inverse vector length (Euclidean norm):\nweight(X)\u003d 1/||X||,\nwhere ||X|| \u003d SQRT(X.X)\u003d SQRT(X1^2 + X2^2)\nHere X is vector made up of X1 and X2.\nEvaluate your homegrown weighted LASSO logistic regression on the test dataset. Report misclassification error (1 - Accuracy) and how many iterations does it took to converge.\nDoes Spark MLLib have a weighted LASSO logistic regression implementation. If so use it and report your findings on the weighted training set and test set.",
+      "dateUpdated": "Apr 6, 2016 1:00:16 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/markdown",
+        "editorHide": false
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459925793449_1885383706",
+      "id": "20160405-235633_1395556591",
+      "result": {
+        "code": "SUCCESS",
+        "type": "HTML",
+        "msg": "\u003ch2\u003eHW11.3 Logistic Regression\u003c/h2\u003e\n\u003cp\u003eGenerate 2 sets of linearly separable data with 100 data points each using the data generation code provided below and plot each in separate plots. Call one the training set and the other the testing set.\n\u003cbr  /\u003edef generateData(n):\n\u003cbr  /\u003e\u0026ldquo;\u0026ldquo;\u0026rdquo; generates a 2D linearly separable dataset with n samples. The third element of the sample is the label \u0026ldquo;\u0026ldquo;\u0026rdquo;\n\u003cbr  /\u003exb \u003d (rand(n)\u003cem\u003e2-1)/2-0.5\n\u003cbr  /\u003eyb \u003d (rand(n)\u003c/em\u003e2-1)/2+0.5\n\u003cbr  /\u003exr \u003d (rand(n)\u003cem\u003e2-1)/2+0.5\n\u003cbr  /\u003eyr \u003d (rand(n)\u003c/em\u003e2-1)/2-0.5\n\u003cbr  /\u003einputs \u003d []\n\u003cbr  /\u003efor i in range(len(xb)):\n\u003cbr  /\u003einputs.append([xb[i],yb[i],1])\n\u003cbr  /\u003einputs.append([xr[i],yr[i],-1])\n\u003cbr  /\u003ereturn inputs\n\u003cbr  /\u003eModify this data generation code to generating non-linearly separable training and testing datasets (with approximately 10% of the data falling on the wrong side of the separating hyperplane. Plot the resulting datasets.\n\u003cbr  /\u003eNOTE: For the remainder of this problem please use the non-linearly separable training and testing datasets.\n\u003cbr  /\u003eUsing MLLib train up a LASSO logistic regression model with the training dataset and evaluate with the testing set. What a good number of iterations for training the logistic regression model? Justify with plots and words.\n\u003cbr  /\u003eDerive and implement in Spark a weighted LASSO logistic regression. Implement a convergence test of your choice to check for termination within your training algorithm .\n\u003cbr  /\u003eWeight the above training dataset as follows: Weight each example using the inverse vector length (Euclidean norm):\n\u003cbr  /\u003eweight(X)\u003d 1/||X||,\n\u003cbr  /\u003ewhere ||X|| \u003d SQRT(X.X)\u003d SQRT(X1\u003csup\u003e(2) + X2\u003c/sup\u003e2)\n\u003cbr  /\u003eHere X is vector made up of X1 and X2.\n\u003cbr  /\u003eEvaluate your homegrown weighted LASSO logistic regression on the test dataset. Report misclassification error (1 - Accuracy) and how many iterations does it took to converge.\n\u003cbr  /\u003eDoes Spark MLLib have a weighted LASSO logistic regression implementation. If so use it and report your findings on the weighted training set and test set.\u003c/p\u003e\n"
+      },
+      "dateCreated": "Apr 5, 2016 11:56:33 PM",
+      "dateStarted": "Apr 6, 2016 12:59:44 AM",
+      "dateFinished": "Apr 6, 2016 12:59:44 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "text": "%pyspark\n\nfrom collections import namedtuple\nimport numpy as np\nimport csv\n\ndef generateData(n):\n    \"\"\" generates a 2D linearly separable dataset with n samples. The third element of the sample is the label \"\"\"\n    \n    np.random.seed(0)\n    xb \u003d np.random.normal(0,0.5,n)-0.5\n    yb \u003d np.random.normal(0,0.5,n)+0.5\n    xr \u003d np.random.normal(0,0.5,n)+0.5\n    yr \u003d np.random.normal(0,0.5,n)-0.5\n    inputs \u003d []\n    for i in range(len(xb)):\n        inputs.append([xb[i],yb[i],1])\n        inputs.append([xr[i],yr[i],-1])\n    return inputs\n    \ntrain_set \u003d generateData(50)\ntest_set \u003d generateData(50)\n\nw \u003d np.array([8, -3, -1])\n\nimport matplotlib.pyplot as plt\ndef dataPlot(dataset):\n    cols \u003d {\u00271\u0027: \u0027r\u0027, \u0027-1\u0027: \u0027b\u0027}\n\n    for row in dataset:\n        plt.plot(float(row[0]), float(row[1]), cols[str(row[2])]+\u0027o\u0027)\n    plt.xlabel(\"x1\")\n    plt.ylabel(\"x2\")\n    x1 \u003d [-2,2]\n    x2 \u003d [-(i * w[0] + w[2]) / w[1] for i in x1]\n    plt.plot(x1, x2, linewidth\u003d2.0)\n    plt.grid()\n    plt.show()\n    \ndataPlot(train_set)",
+      "dateUpdated": "Apr 6, 2016 1:04:27 AM",
+      "config": {
+        "colWidth": 12.0,
+        "graph": {
+          "mode": "table",
+          "height": 300.0,
+          "optionOpen": false,
+          "keys": [],
+          "values": [],
+          "groups": [],
+          "scatter": {}
+        },
+        "enabled": true,
+        "editorMode": "ace/mode/scala"
+      },
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459929475492_-392659289",
+      "id": "20160406-005755_68037186",
+      "result": {
+        "code": "SUCCESS",
+        "type": "TEXT",
+        "msg": ""
+      },
+      "dateCreated": "Apr 6, 2016 12:57:55 AM",
+      "dateStarted": "Apr 6, 2016 1:04:27 AM",
+      "dateFinished": "Apr 6, 2016 1:04:44 AM",
+      "status": "FINISHED",
+      "progressUpdateIntervalMs": 500
+    },
+    {
+      "config": {},
+      "settings": {
+        "params": {},
+        "forms": {}
+      },
+      "jobName": "paragraph_1459929787439_-1413971694",
+      "id": "20160406-010307_172714719",
+      "dateCreated": "Apr 6, 2016 1:03:07 AM",
+      "status": "READY",
+      "progressUpdateIntervalMs": 500
+    }
+  ],
+  "name": "HW11-Team5-LinRojasBarrera",
+  "id": "2BHRKMDZ1",
+  "angularObjects": {
+    "2BJAA9GG1": [],
+    "2BJ7ZAUUJ": [],
+    "2BGBQS6BY": [],
+    "2BECNB4S6": [],
+    "2BJ9U9XGS": [],
+    "2BEYSPXTE": [],
+    "2BHFDSJ32": [],
+    "2BGTG68SZ": [],
+    "2BG6EPBJD": [],
+    "2BHQ3B74F": [],
+    "2BH2SPRK1": [],
+    "2BEE92DFR": [],
+    "2BGM8D8ES": [],
+    "2BGZ937AP": []
+  },
+  "config": {},
+  "info": {}
+}
