@@ -1,0 +1,5 @@
+ERROR	php: dying for unknown reasons
+WARN	dave, are you angry at me?
+ERROR	 spark context missing...darn it 
+WARN	xylons approaching
+ERROR	mysql cluster: replace with spark cluster
